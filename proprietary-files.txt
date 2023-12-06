@@ -1,0 +1,46 @@
+# All blobs from redfin-user 11 RQ3A.211001.001.A1 7641976 release-keys, unless pinned
+
+# Audio
+
+# Bluetooth-AptX
+lib/libaptXHD_encoder.so
+lib/libaptX_encoder.so
+
+# Camera
+
+# Charger
+bin/kpoc_charger
+etc/init/kpoc_charger.rc
+lib/libshowlogo.so
+
+# DRM
+
+# Display-Hardware
+
+# GPS
+
+# GPS-Hardware
+
+# Graphics
+
+# Listen
+
+# Media
+
+# Media-Hardware
+
+# Perf
+
+# Postprocessing
+
+# QMI
+
+# Radio
+
+# Sensors
+
+# Time
+
+# WiFi
+
+# Misc

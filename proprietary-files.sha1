@@ -1,0 +1,46 @@
+# All blobs are from "redfin-user 11 RQ3A.211001.001.A1 7641976 release-keys" and are pinned with sha1sum values
+
+# Audio
+
+# Bluetooth-AptX
+lib/libaptXHD_encoder.so|42541fe649a7d7e4ff28a6a530ef149581c75ea8
+lib/libaptX_encoder.so|5ec91d94ccf8f648099112282cf75a6d7a5f57db
+
+# Camera
+
+# Charger
+bin/kpoc_charger|bab151b349415222f33854d66ea508e0fd34329a
+etc/init/kpoc_charger.rc|cbe7efb22ff9393d4253738d77bcfe89c0379d11
+lib/libshowlogo.so|6eac92d896b36d5ba980e72f1e302367ecf760b4
+
+# DRM
+
+# Display-Hardware
+
+# GPS
+
+# GPS-Hardware
+
+# Graphics
+
+# Listen
+
+# Media
+
+# Media-Hardware
+
+# Perf
+
+# Postprocessing
+
+# QMI
+
+# Radio
+
+# Sensors
+
+# Time
+
+# WiFi
+
+# Misc
