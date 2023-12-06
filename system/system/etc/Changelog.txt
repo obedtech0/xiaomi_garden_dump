@@ -1,0 +1,39 @@
+====================
+     07-15-2022
+====================
+   * build/make
+f986a20c5 Bump Security String to 2022-07-05
+   * frameworks/base
+c7d8acb05346 PixelPropsUtils: Update fingerprints to July 2022
+   * frameworks/opt/telephony
+9c37a83f2 Enforce privileged phone state for getSubscriptionProperty(GROUP_UUID)
+   * packages/apps/DU-Tweaks
+6b7ebf9 NAD: remove duplicated team
+   * packages/apps/KeyChain
+fa148f3 Encode authority part of uri before showing in UI
+   * packages/apps/Settings
+f104e588b9 Fix LaunchAnyWhere in AppRestrictionsFragment
+   * system/bt
+c4754386b Security: Fix out of bound read in AT_SKIP_REST
+
+
+====================
+     07-14-2022
+====================
+
+
+====================
+     07-13-2022
+====================
+
+
+====================
+     07-12-2022
+====================
+
+
+====================
+     07-11-2022
+====================
+
+

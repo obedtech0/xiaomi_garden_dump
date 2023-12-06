@@ -1,0 +1,125 @@
+import /system/etc/init/init.safailnet.rc
+import /system/etc/init/init.ago.rc
+
+on init
+    setprop sys.usb.ffs.aio_compat 1
+
+    # boot time fs tune
+    write /sys/block/mmcblk0/queue/iostats 0
+    write /sys/block/mmcblk0/queue/scheduler cfq
+    write /sys/block/mmcblk0/queue/iosched/slice_idle 0
+    write /sys/block/mmcblk0/queue/read_ahead_kb 2048
+    write /sys/block/mmcblk0/queue/nr_requests 256
+    write /sys/block/dm-0/queue/read_ahead_kb 2048
+    write /sys/block/dm-1/queue/read_ahead_kb 2048
+    write /sys/block/dm-2/queue/read_ahead_kb 2048
+
+    # Custom overrides that need to happen right on boot
+    # Override vendor fstab
+    # We only need it to be overridden before things are mounted
+    mount none /system/etc/fstab.mt6762 /vendor/etc/fstab.mt6762 bind
+    mount none /system/etc/fstab.mt6765 /vendor/etc/fstab.mt6765 bind
+    mount none /system/etc/fstab.enableswap /vendor/etc/fstab.enableswap bind
+    mount none /vendor/lost+found /vendor/overlay bind
+    chown system system /dev/input/event3
+
+on property:persist.sys.garden.dt2w=0 && property:ro.boot.hwname=dandelion
+    exec /system/bin/sendevent /dev/input/event3 0 1 4
+
+on property:persist.sys.garden.dt2w=1 && property:ro.boot.hwname=dandelion
+    exec /system/bin/sendevent /dev/input/event3 0 1 5
+
+on property:persist.sys.garden.dt2w=0 && property:ro.boot.hwname=angelica
+    exec /system/bin/sendevent /dev/input/event4 0 1 4
+
+on property:persist.sys.garden.dt2w=1 && property:ro.boot.hwname=angelica
+    exec /system/bin/sendevent /dev/input/event4 0 1 5
+
+on fs
+    mount_all /vendor/etc/fstab.mt6765 --early
+    mount_all /vendor/etc/fstab.mt6765 --late
+
+on post-fs
+    # Unmount the overridden fstab because the SELinux label is incorrect
+    # and some MTK daemons can crash because of that
+    # (at post-fs, the fstab has already been used to mount the partitions,
+    #  so it is fine to just revert back)
+    umount /vendor/etc/fstab.mt6762
+    umount /vendor/etc/fstab.mt6765
+
+    # Disable OEM Lights
+    mount none /dev/null vendor/lib/hw/lights.mt6765.so bind
+    mount none /dev/null vendor/lib/hw/android.hardware.light@2.0-impl-mediatek.so bind
+    mount none /dev/null vendor/bin/hw/android.hardware.light@2.0-service-mediatek bind
+    mount none /dev/null vendor/etc/init/android.hardware.light@2.0-service-mediatek.rc bind
+
+    mount none /system/etc/audio_policy_configuration.xml /vendor/etc/audio_policy_configuration.xml bind
+
+on boot
+
+on property:init.svc.console=running
+    setprop init.svc.console stopped
+
+# Disable AOSP RIL if MTK RIL is up
+on property:vendor.ril.mtk=1
+    stop vendor.ril-daemon
+
+on property:sys.boot_completed=1
+    # Toggle airplane mode on and off on boot to enable volte.
+    # This hack needs ImsInit commit to request ims on boot to work properly
+
+    exec - root -- /system/bin/sh -c "sleep 3"
+    exec - root -- /system/bin/sh -c "settings put global airplane_mode_on 1"
+    exec - root -- /system/bin/sh -c "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true"
+
+    exec - root -- /system/bin/sh -c "settings put global airplane_mode_on 0"
+    exec - root -- /system/bin/sh -c "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false"
+
+    # ZRAM
+    swapon_all /system/etc/fstab.enableswap
+    umount /vendor/etc/fstab.enableswap
+
+    # Runtime fs tuning for runtime performance
+    write /sys/block/mmcblk0/queue/iostats 1
+    write /sys/block/mmcblk0/queue/read_ahead_kb 512
+    write /sys/block/mmcblk0/queue/nr_requests 128
+    write /sys/block/dm-0/queue/read_ahead_kb 128
+    write /sys/block/dm-1/queue/read_ahead_kb 128
+    write /sys/block/dm-2/queue/read_ahead_kb 128
+
+# Logcat Services
+service boot_log /system/bin/logcat -b all -D -f /cache/boot_log_full.txt
+    class main
+    user root
+    group root system
+    disabled
+    oneshot
+
+service boot_log_crash /system/bin/logcat -b crash -D -f /cache/boot_log_crash.txt
+    class main
+    user root
+    group root system
+    disabled
+    oneshot
+
+service boot_log_kernel /system/bin/logcat -b kernel -D -f /cache/boot_log_kernel.txt
+    class main
+    user root
+    group root system
+    disabled
+    oneshot
+
+on post-fs-data
+# Clear existing log and start the service
+    rm /cache/boot_log_full.txt
+    rm /cache/boot_log_crash.txt
+    rm /cache/boot_log_kernel.txt
+    start boot_log
+    start boot_log_crash
+    start boot_log_kernel
+
+on property:sys.boot_completed=1
+# Stop the logger service
+    stop boot_log
+    stop boot_log_crash
+    stop boot_log_kernel
